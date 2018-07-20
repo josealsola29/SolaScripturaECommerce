@@ -97,8 +97,8 @@ if(isset($_POST["nombre"])){
                             </div>  
                             
                             <div class="form-group text-left">
-                                    <label for="correo">			* Correo Electrónico:</label>
-                                    <input type="email" 			name="correo" 			id="correo" 			class="form-control" 	 	placeholder="Escriba su correo electrónico"/>
+                                    <label for="email">			* Correo Electrónico:</label>
+                                    <input type="email" 			name="email" 			id="email" 			class="form-control" 	 	placeholder="Escriba su correo electrónico"/>
                             </div>   
                             
                             <div class="form-group text-left">
