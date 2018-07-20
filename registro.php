@@ -1,16 +1,62 @@
 <?php
-require "php/conn.php";
-if(isset($_POST["nombre"])){
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-	$nombre = $_POST["nombre"];
-}
+	require "php/conn.php";
+	$errores=array(); 
+	if(isset($_POST["nombre"])){
+		$nombre =			$_POST["nombre"];
+		$apellidoPaterno = 	$_POST["apellidoPaterno"];
+		$apellidoMaterno = 	$_POST["apellidoMaterno"];
+		$email = 			$_POST["email"];
+		$contraseña1 = 		$_POST["contraseña1"];
+		$contraseña2 = 		$_POST["contraseña2"];
+		$direccion = 		$_POST["direccion"];
+		$pais = 			$_POST["pais"];
+		$provincia = 		$_POST["provincia"];
+
+		if($nombre == ""){
+			$errores[0] = 	"Alerta! . . . Se requiere el nombre del usuario >:c";
+		}else if($apellidoPaterno == ""){
+			$errores[1]=	"Alerta! . . . Se requiere el apellido paterno del usuario >:c";
+		}else if($email == ""){
+			$errores[2]=	"Alerta! . . . Se requiere el email del usuario >:c";
+		}else if($direccion == ""){
+			$errores[3]=	"Alerta! . . . Se requiere la dirección del usuario >:c";
+		}else if($pais == ""){
+			$errores[4]=	"Alerta! . . . Se requiere país del usuario >:c";
+		}else if($provincia == ""){
+			$errores[5]=	"Alerta! . . . Se requiere la provincia del usuario >:c";
+		}else if($contraseña1 !== $contraseña2){
+			$errores[10]=	"Alerta! . . . Se requiere que las claves sean idénticas. >:c";
+		}else{			
+			if(validarCorreo ($email, $conn)){		
+				$clave = hash_hmac("sha512",$contraseña1,"soybatman");	
+				$sql = "INSERT INTO usuarios VALUES (0,";
+				$sql .= "'".$nombre.			"', '".$clave."', '".$apellidoPaterno."',";
+				$sql .= "'".$apellidoMaterno.	"', '".$email.			"', ";
+				$sql .= "'".$direccion.			"', '".$pais.			"', ";
+				$sql .= "'".$provincia.			"')";
+
+				if(mysqli_query($conn,$sql)){
+					header("location: registroGracias.php");
+				}else {
+					$errores[9] = "Alerta! . . . Se  ha producido un error en la a la base de datos >:c";
+				}
+			}else {
+				$errores[8] = "Alerta! . . . El correo ya esta en uso. >:/";
+			}
+		}
+	}
+	
+	function validarCorreo($email, $conn){		
+		$sql 		= "SELECT * FROM usuarios WHERE email='".$email."'";
+		$resultado 	= mysqli_query($conn,$sql); 
+		//Numero de renglones que trae el resultado
+		$numFilas 	= mysqli_num_rows($resultado);
+		//Si el numero de renglones es igual a 0 retornar true, de lo contrio retornar 0
+		$consulta 	= ($numFilas == 0) ? true : false;		
+		return $consulta;
+		}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,6 +124,15 @@ if(isset($_POST["nombre"])){
 				<!--  ************************C O L U M N A*********************         -->		
 				<div class="col-sm-8 text-left">
                     <div class="well" id="contenedor">
+						<?php
+							if(count($errores)>0){
+								print '<div class="alert alert-danger">';
+								foreach ($errores as $key => $valor) {
+									print "<strong>* ".$valor."</strong>";
+								}
+								print '</div>';
+							}
+						?>
                         <h2 class="text-center">Registro</h2>
                         <p> Favor de capturar los siguientes datos: </p>
                         <form action="registro.php" method="post">
@@ -100,10 +155,18 @@ if(isset($_POST["nombre"])){
                                     <label for="email">			* Correo Electrónico:</label>
                                     <input type="email" 			name="email" 			id="email" 			class="form-control" 	 	placeholder="Escriba su correo electrónico"/>
                             </div>   
+                            <div class="form-group text-left">
+                                    <label for="contraseña1">			* Contraseña:</label>
+                                    <input type="password" 			name="contraseña1" 			id="contraseña1" 			class="form-control" 	 	placeholder="Escriba su contraseña"/>
+                            </div>   
+                            <div class="form-group text-left">
+                                    <label for="contraseña2">			* Repetir contraseña:</label>
+                                    <input type="password" 			name="contraseña2" 			id="contraseña2" 			class="form-control" 	 	placeholder="Escriba su contraseña nuevamente"/>
+                            </div>   
                             
                             <div class="form-group text-left">
-                                    <label for="dirrecion">			* Dirección:</label>
-                                    <input type="text" 			name="dirrecion" 			id="dirrecion" 			class="form-control" 	 	placeholder="Escriba su dirreción"/>
+                                    <label for="direccion">			* Dirección:</label>
+                                    <input type="text" 			name="direccion" 			id="direccion" 			class="form-control" 	 	placeholder="Escriba su dirreción"/>
                             </div>  
    
                             <div class="form-group text-left">
@@ -112,8 +175,8 @@ if(isset($_POST["nombre"])){
                             </div>
 
                             <div class="form-group text-left">
-                                    <label for="ciudad">			* Ciudad:</label>
-                                    <input type="text" 			name="ciudad" 			    id="ciudad" 			class="form-control" 	 	placeholder="Escriba su ciudad"/>
+                                    <label for="provincia">			* Provincia:</label>
+                                    <input type="text" 			name="provincia" 			    id="provincia" 			class="form-control" 	 	placeholder="Escriba su provincia"/>
                             </div>
 
 
@@ -152,9 +215,5 @@ if(isset($_POST["nombre"])){
 		<p> Todos los derechos reservados &copy;</p>
 		<a href="aviso.php">Aviso de privacidad</a>	
 	</footer>
-
-
-
-
 </body>
 </html> 
